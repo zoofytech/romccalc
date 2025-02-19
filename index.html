@@ -13,11 +13,11 @@
     }
     /* Dark mode styles */
     body.dark {
-      background-color: #1A252F; /* Darker blue/grey */
+      background-color: #1A252F; 
       color: #ECF0F1;
     }
     body.dark input {
-      background-color: #2E4053; /* Distinct background for inputs */
+      background-color: #2E4053; 
       color: #ECF0F1;
       border: 1px solid #3C566B;
       transition: background-color 0.3s, color 0.3s;
@@ -45,7 +45,7 @@
       border: 1px solid #bbb;
       transition: background-color 0.3s, color 0.3s;
     }
-    /* Toggle button positioned at top right */
+    /* Light/dark positioned at top right */
     #toggleButton {
       position: fixed;
       top: 10px;
@@ -61,7 +61,7 @@
   </style>
 </head>
 <body class="dark">
-  <button id="toggleButton" onclick="toggleMode()">Toggle Light Mode</button>
+  <button id="toggleButton" onclick="toggleMode()">Light Mode</button>
   <h1>Ragnarok M:Classic </h1>
   <h2> Monster EXP Calculator</h2> <br /><br />
   <label for="level">Enter Your Level:</label>
@@ -96,7 +96,7 @@
       });
 
     function calculateExp() {
-      // Parse level as an integer
+      // Parse level as an int
       let level = parseInt(document.getElementById("level").value, 10);
       let expType = document.querySelector('input[name="expType"]:checked').value;
       let resultDiv = document.getElementById("result");
@@ -112,7 +112,7 @@
         return;
       }
 
-      // Fixed level gap threshold (party function removed)
+      // Fixed lvl
       let gapThreshold = 30;
 
       let bestMonster = monsters.reduce((best, monster) => {
@@ -131,11 +131,11 @@
       if (document.body.classList.contains("dark")) {
         document.body.classList.remove("dark");
         document.body.classList.add("light");
-        document.getElementById("toggleButton").textContent = "Toggle Dark Mode";
+        document.getElementById("toggleButton").textContent = "Dark Mode";
       } else {
         document.body.classList.remove("light");
         document.body.classList.add("dark");
-        document.getElementById("toggleButton").textContent = "Toggle Light Mode";
+        document.getElementById("toggleButton").textContent = "Light Mode";
       }
     }
   </script>
