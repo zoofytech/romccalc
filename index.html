@@ -1,228 +1,295 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ragnarok M:Classic Monster EXP Calculator</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-        input, button { margin: 10px; padding: 10px; font-size: 16px; }
-        #result { margin-top: 20px; font-weight: bold; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ragnarok M:Classic EXP Clac </title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    /* Dark mode styles */
+    body.dark {
+      background-color: #1A252F; /* Darker blue/grey */
+      color: #ECF0F1;
+    }
+    body.dark input {
+      background-color: #2E4053; /* Slightly lighter than body for inputs */
+      color: #ECF0F1;
+      border: 1px solid #3C566B;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark button {
+      background-color: #34495E;
+      color: #ECF0F1;
+      border: 1px solid #2C3E50;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    /* Light mode styles */
+    body.light {
+      background-color: #ffffff;
+      color: #000000;
+    }
+    body.light input {
+      background-color: #f0f0f0;
+      color: #000000;
+      border: 1px solid #ccc;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.light button {
+      background-color: #e0e0e0;
+      color: #000000;
+      border: 1px solid #bbb;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    /* Toggle button positioned at top right */
+    #toggleButton {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 100;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
 </head>
-<body>
-    <h2>Ragnarok M:Classic Monster EXP Calculator</h2>
-    <label for="level">Enter Your Level:</label>
-    <input type="number" id="level" min="1" max="130">
-    <br>
-    <input type="radio" id="baseExp" name="expType" value="base" checked>
-    <label for="baseExp">Best Base EXP</label>
-    <input type="radio" id="jobExp" name="expType" value="job">
-    <label for="jobExp">Best Job EXP</label>
-    <br>
-    <input type="checkbox" id="party">
-    <label for="party">In Party? (Level gap threshold increases to 35)</label>
-    <br>
-    <button onclick="calculateExp()">Calculate</button>
-    <div id="result"></div>
+<body class="dark">
+  <button id="toggleButton" onclick="toggleMode()">Light Mode</button>
+  <br>
+  <h1>Ragnarok M:Classic </br> </h1> 
+  <h2> Monster EXP Calculator</h2>
+  <label for="level">Enter Your Level:</label>
+  <input type="number" id="level" min="1" max="130" />
+  <br />
+  <input type="radio" id="baseExp" name="expType" value="base" checked />
+  <label for="baseExp">Best Base EXP</label>
+  <input type="radio" id="jobExp" name="expType" value="job" />
+  <label for="jobExp">Best Job EXP</label>
+  <br />
+  <input type="checkbox" id="party" />
+  <label for="party">In Party</label>
+  <br />
+  <button onclick="calculateExp()">Calculate</button>
+  <div id="result"></div>
 
-    <script>
-        const monsters = [
-			{ level: 1, name: "Poring", baseExp: 11, jobExp: 5 },
-			{ level: 2, name: "Lunatic", baseExp: 26, jobExp: 8 },
-			{ level: 3, name: "Fabre", baseExp: 28, jobExp: 19 },
-			{ level: 4, name: "Pupa", baseExp: 2, jobExp: 1 },
-			{ level: 6, name: "Pecopeco Egg", baseExp: 2, jobExp: 1 },
-			{ level: 11, name: "Tarou", baseExp: 122, jobExp: 60 },
-			{ level: 12, name: "Ant Egg", baseExp: 2, jobExp: 1 },
-			{ level: 13, name: "Thief Bug", baseExp: 178, jobExp: 52 },
-			{ level: 13, name: "Chon Chon", baseExp: 113, jobExp: 91 },
-			{ level: 15, name: "Spore", baseExp: 81, jobExp: 133 },
-			{ level: 15, name: "Yoyo", baseExp: 184, jobExp: 73 },
-			{ level: 17, name: "Familiar", baseExp: 183, jobExp: 97 },
-			{ level: 17, name: "Wormtail", baseExp: 162, jobExp: 110 },
-			{ level: 19, name: "Rocker", baseExp: 165, jobExp: 132 },
-			{ level: 20, name: "Thief Bug Female", baseExp: 219, jobExp: 113 },
-			{ level: 20, name: "Thief Bug Male", baseExp: 241, jobExp: 100 },
-			{ level: 20, name: "Creamy", baseExp: 193, jobExp: 128 },
-			{ level: 21, name: "Willow", baseExp: 183, jobExp: 146 },
-			{ level: 22, name: "Mandragora", baseExp: 204, jobExp: 146 },
-			{ level: 23, name: "Hydra", baseExp: 219, jobExp: 149 },
-			{ level: 24, name: "Wolf", baseExp: 242, jobExp: 147 },
-			{ level: 25, name: "Roda Frog", baseExp: 212, jobExp: 176 },
-			{ level: 26, name: "Whisper", baseExp: 195, jobExp: 198 },
-			{ level: 27, name: "Pirate Skeleton", baseExp: 273, jobExp: 166 },
-			{ level: 28, name: "Poison Spore", baseExp: 311, jobExp: 155 },
-			{ level: 29, name: "Vadon", baseExp: 288, jobExp: 180 },
-			{ level: 30, name: "Skeleton", baseExp: 264, jobExp: 206 },
-			{ level: 31, name: "Thara Frog", baseExp: 311, jobExp: 195 },
-			{ level: 32, name: "Marina", baseExp: 321, jobExp: 206 },
-			{ level: 32, name: "Marine Sphere", baseExp: 1, jobExp: 1 },
-			{ level: 33, name: "Obeaune", baseExp: 336, jobExp: 212 },
-			{ level: 34, name: "Phen", baseExp: 350, jobExp: 222 },
-			{ level: 35, name: "Goblin (Knife)", baseExp: 371, jobExp: 224 },
-			{ level: 35, name: "Goblin (Buckler)", baseExp: 364, jobExp: 229 },
-			{ level: 35, name: "Goblin (Hammer)", baseExp: 367, jobExp: 227 },
-			{ level: 35, name: "Goblin (Spear)", baseExp: 369, jobExp: 226 },
-			{ level: 35, name: "Goblin (Axe)", baseExp: 410, jobExp: 202 },
-			{ level: 36, name: "Marc", baseExp: 376, jobExp: 238 },
-			{ level: 37, name: "Goblin Archer", baseExp: 393, jobExp: 242 },
-			{ level: 38, name: "Hornet", baseExp: 357, jobExp: 281 },
-			{ level: 39, name: "Steam Goblin", baseExp: 436, jobExp: 251 },
-			{ level: 40, name: "Deniro", baseExp: 430, jobExp: 270 },
-			{ level: 41, name: "Flora", baseExp: 449, jobExp: 284 },
-			{ level: 42, name: "Piere", baseExp: 466, jobExp: 298 },
-			{ level: 43, name: "Argiope", baseExp: 563, jobExp: 266 },
-			{ level: 44, name: "Andre", baseExp: 500, jobExp: 327 },
-			{ level: 45, name: "Menblatt", baseExp: 456, jobExp: 376 },
-			{ level: 46, name: "Drainliar", baseExp: 673, jobExp: 274 },
-			{ level: 47, name: "Vitata", baseExp: 574, jobExp: 356 },
-			{ level: 48, name: "Giearth", baseExp: 600, jobExp: 365 },
-			{ level: 49, name: "Muka", baseExp: 723, jobExp: 317 },
-			{ level: 50, name: "Pecopeco", baseExp: 736, jobExp: 333 },
-			{ level: 51, name: "Magnolia", baseExp: 655, jobExp: 413 },
-			{ level: 52, name: "Soldier Skeleton", baseExp: 695, jobExp: 422 },
-			{ level: 53, name: "Desert Wolf", baseExp: 713, jobExp: 444 },
-			{ level: 54, name: "Matyr", baseExp: 888, jobExp: 373 },
-			{ level: 55, name: "Mummy", baseExp: 691, jobExp: 520 },
-			{ level: 55, name: "Golem", baseExp: 1177, jobExp: 237 },
-			{ level: 55, name: "Metaller", baseExp: 761, jobExp: 480 },
-			{ level: 56, name: "Elder Willow", baseExp: 794, jobExp: 492 },
-			{ level: 57, name: "Isis", baseExp: 988, jobExp: 412 },
-			{ level: 58, name: "Bigfoot", baseExp: 858, jobExp: 520 },
-			{ level: 59, name: "Savage", baseExp: 993, jobExp: 473 },
-			{ level: 60, name: "Greatest General", baseExp: 910, jobExp: 553 },
-			{ level: 61, name: "Eggyra", baseExp: 699, jobExp: 716 },
-			{ level: 62, name: "Horong", baseExp: 977, jobExp: 594 },
-			{ level: 62, name: "Dustiness", baseExp: 950, jobExp: 609 },
-			{ level: 63, name: "Munak", baseExp: 1083, jobExp: 574 },
-			{ level: 64, name: "Minorous", baseExp: 1210, jobExp: 539 },
-			{ level: 65, name: "Bongun", baseExp: 1113, jobExp: 636 },
-			{ level: 65, name: "Mantis", baseExp: 1058, jobExp: 667 },
-			{ level: 66, name: "Skeleton Archer", baseExp: 1134, jobExp: 665 },
-			{ level: 67, name: "Sohee", baseExp: 1139, jobExp: 701 },
-			{ level: 68, name: "Marduk", baseExp: 1181, jobExp: 717 },
-			{ level: 69, name: "Dokebi", baseExp: 1320, jobExp: 676 },
-			{ level: 70, name: "Orc Warrior", baseExp: 1524, jobExp: 597 },
-			{ level: 71, name: "Orc Archer", baseExp: 949, jobExp: 981 },
-			{ level: 72, name: "Nine Tail", baseExp: 1806, jobExp: 529 },
-			{ level: 72, name: "Wild Rose", baseExp: 1317, jobExp: 814 },
-			{ level: 72, name: "Kobold (Axe)", baseExp: 1301, jobExp: 823 },
-			{ level: 73, name: "High Orc", baseExp: 1524, jobExp: 713 },
-			{ level: 73, name: "Kobold (Buckler)", baseExp: 1498, jobExp: 757 },
-			{ level: 74, name: "Nightmare", baseExp: 1059, jobExp: 1059 },
-			{ level: 74, name: "Kobold (Mace)", baseExp: 1381, jobExp: 873 },
-			{ level: 75, name: "Orc Zombie", baseExp: 1444, jobExp: 884 },
-			{ level: 75, name: "Kobold Archer", baseExp: 1440, jobExp: 887 },
-			{ level: 75, name: "Myst Case", baseExp: 1437, jobExp: 888 },
-			{ level: 76, name: "Sky Petite", baseExp: 1486, jobExp: 909 },
-			{ level: 77, name: "Marionette", baseExp: 1032, jobExp: 1221 },
-			{ level: 78, name: "Orc Skeleton", baseExp: 1560, jobExp: 961 },
-			{ level: 78, name: "Cookie", baseExp: 1607, jobExp: 934 },
-			{ level: 79, name: "Green Petite", baseExp: 1600, jobExp: 986 },
-			{ level: 79, name: "Teddy Bear", baseExp: 1642, jobExp: 963 },
-			{ level: 80, name: "Deviruchi", baseExp: 1851, jobExp: 888 },
-			{ level: 80, name: "Succubus", baseExp: 1415, jobExp: 1142 },
-			{ level: 81, name: "Hunter Fly", baseExp: 1672, jobExp: 1050 },
-			{ level: 81, name: "Incubus", baseExp: 1461, jobExp: 1171 },
-			{ level: 81, name: "Raydric Archer", baseExp: 1574, jobExp: 1106 },
-			{ level: 81, name: "Cruiser", baseExp: 2041, jobExp: 834 },
-			{ level: 82, name: "Ferus", baseExp: 2279, jobExp: 753 },
-			{ level: 82, name: "Abysmal Knight", baseExp: 1571, jobExp: 1163 },
-			{ level: 82, name: "Sting", baseExp: 1586, jobExp: 1155 },
-			{ level: 83, name: "Wraith", baseExp: 1973, jobExp: 986 },
-			{ level: 83, name: "Rideword", baseExp: 1001, jobExp: 1551 },
-			{ level: 83, name: "Cramp", baseExp: 1722, jobExp: 1132 },
-			{ level: 83, name: "Zipper Bear", baseExp: 1835, jobExp: 1066 },
-			{ level: 84, name: "Anolian", baseExp: 1811, jobExp: 1137 },
-			{ level: 85, name: "Injustice", baseExp: 1749, jobExp: 1229 },
-			{ level: 86, name: "Gargoyle", baseExp: 1455, jobExp: 1455 },
-			{ level: 87, name: "Raydric", baseExp: 2129, jobExp: 1120 },
-			{ level: 87, name: "Christmas Cookie", baseExp: 1969, jobExp: 1213 },
-			{ level: 88, name: "Baphomet JR.", baseExp: 2140, jobExp: 1170 },
-			{ level: 88, name: "Evil Druid", baseExp: 1570, jobExp: 1501 },
-			{ level: 88, name: "Punk", baseExp: 2029, jobExp: 1235 },
-			{ level: 90, name: "Dark Priest", baseExp: 1994, jobExp: 1367 },
-			{ level: 90, name: "Black Witch", baseExp: 2173, jobExp: 1264 },
-			{ level: 90, name: "Wind Ghost", baseExp: 2114, jobExp: 1298 },
-			{ level: 91, name: "Joker", baseExp: 2126, jobExp: 1355 },
-			{ level: 91, name: "Alarm", baseExp: 2236, jobExp: 1290 },
-			{ level: 91, name: "Carat", baseExp: 2018, jobExp: 1418 },
-			{ level: 92, name: "Ancient Clock", baseExp: 1853, jobExp: 1578 },
-			{ level: 93, name: "Khalitzburg", baseExp: 2248, jobExp: 1413 },
-			{ level: 93, name: "Bathory", baseExp: 2735, jobExp: 1130 },
-			{ level: 94, name: "Wanderer", baseExp: 1989, jobExp: 1627 },
-			{ level: 94, name: "Elder", baseExp: 2350, jobExp: 1417 },
-			{ level: 95, name: "Metaling", baseExp: 2558, jobExp: 1360 },
-			{ level: 95, name: "Penomena", baseExp: 2112, jobExp: 1620 },
-			{ level: 96, name: "Brilight", baseExp: 2223, jobExp: 1620 },
-			{ level: 97, name: "Typhoon", baseExp: 2435, jobExp: 1560 },
-			{ level: 97, name: "97", baseExp: 2423, jobExp: 1567 },
-			{ level: 99, name: "Orc Lady", baseExp: 2558, jobExp: 1617 },
-			{ level: 99, name: "Martin Scavenger", baseExp: 2573, jobExp: 1609 },
-			{ level: 101, name: "Removal", baseExp: 2689, jobExp: 1629 },
-			{ level: 103, name: "Mechanical Hound", baseExp: 2851, jobExp: 1584 },
-			{ level: 105, name: "Mutant Deposits", baseExp: 2828, jobExp: 1644 },
-			{ level: 106, name: "Marmot (Irritated Martin)", baseExp: 2708, jobExp: 1738 },
-			{ level: 106, name: "Dark Swordsman", baseExp: 2849, jobExp: 1657 },
-			{ level: 107, name: "Dark Acolyte", baseExp: 3012, jobExp: 1585 },
-			{ level: 108, name: "Geographer", baseExp: 2550, jobExp: 1878 },
-			{ level: 108, name: "Dark Mage", baseExp: 3109, jobExp: 1553 },
-			{ level: 109, name: "Harpy", baseExp: 2911, jobExp: 1693 },
-			{ level: 109, name: "Fiery Deviruchi", baseExp: 2911, jobExp: 1693 },
-			{ level: 109, name: "Dark Merchant", baseExp: 2769, jobExp: 1776 },
-			{ level: 110, name: "Fiery Mane", baseExp: 2932, jobExp: 1704 },
-			{ level: 110, name: "Dark Archer", baseExp: 2923, jobExp: 1704 },
-			{ level: 110, name: "Quve", baseExp: 2581, jobExp: 1908 },
-			{ level: 111, name: "Hylozoist", baseExp: 3007, jobExp: 1684 },
-			{ level: 111, name: "Highland Parasite", baseExp: 2953, jobExp: 1716 },
-			{ level: 112, name: "Fire Elf", baseExp: 2973, jobExp: 1729 },
-			{ level: 112, name: "Gibbet", baseExp: 3336, jobExp: 1517 },
-			{ level: 112, name: "Dark Thief", baseExp: 3136, jobExp: 1633 },
-			{ level: 113, name: "Dullahan", baseExp: 2813, jobExp: 1846 },
-			{ level: 114, name: "Fire Fledgling", baseExp: 3015, jobExp: 1752 },
-			{ level: 114, name: "Lantern Fisherman", baseExp: 2961, jobExp: 1784 },
-			{ level: 115, name: "Lude", baseExp: 2914, jobExp: 1835 },
-			{ level: 116, name: "Tomb Zombie", baseExp: 3056, jobExp: 1777 },
-			{ level: 116, name: "Magic Pattern Paper", baseExp: 3060, jobExp: 1774 },
-			{ level: 118, name: "Scarecrow", baseExp: 3098, jobExp: 1800 },
-			{ level: 118, name: "Panda Poring", baseExp: 3267, jobExp: 1702 },
-			{ level: 120, name: "Fisherman", baseExp: 2893, jobExp: 1967 },
-			{ level: 121, name: "Hodremlin", baseExp: 3045, jobExp: 1904 },
-			{ level: 122, name: "Stapo", baseExp: 2965, jobExp: 1974 },
-			{ level: 122, name: "Water Snake", baseExp: 3045, jobExp: 1927 },
-			{ level: 123, name: "Small Siroma", baseExp: 3520, jobExp: 1676 },
-			{ level: 124, name: "Red-tailed Obeaune", baseExp: 2809, jobExp: 2112 },
-			{ level: 124, name: "Man-eating Grass", baseExp: 3202, jobExp: 1883 },
-			{ level: 125, name: "Siroma", baseExp: 2955, jobExp: 2052 },
-			{ level: 126, name: "Roween", baseExp: 2831, jobExp: 2148 },
-			{ level: 127, name: "Marin", baseExp: 3284, jobExp: 1909 },
-			{ level: 128, name: "Devil's Eye", baseExp: 2795, jobExp: 2217 },
-			{ level: 130, name: "Red Devil's Eye", baseExp: 2544, jobExp: 2314 }
-        ];
+  <script>
+    const monsters = [
+      { level: 1, name: "Poring", baseExp: 11, jobExp: 5 },
+      { level: 2, name: "Lunatic", baseExp: 26, jobExp: 8 },
+      { level: 3, name: "Fabre", baseExp: 28, jobExp: 19 },
+      { level: 4, name: "Pupa", baseExp: 2, jobExp: 1 },
+      { level: 6, name: "Pecopeco Egg", baseExp: 2, jobExp: 1 },
+      { level: 11, name: "Tarou", baseExp: 122, jobExp: 60 },
+      { level: 12, name: "Ant Egg", baseExp: 2, jobExp: 1 },
+      { level: 13, name: "Thief Bug", baseExp: 178, jobExp: 52 },
+      { level: 13, name: "Chon Chon", baseExp: 113, jobExp: 91 },
+      { level: 15, name: "Spore", baseExp: 81, jobExp: 133 },
+      { level: 15, name: "Yoyo", baseExp: 184, jobExp: 73 },
+      { level: 17, name: "Familiar", baseExp: 183, jobExp: 97 },
+      { level: 17, name: "Wormtail", baseExp: 162, jobExp: 110 },
+      { level: 19, name: "Rocker", baseExp: 165, jobExp: 132 },
+      { level: 20, name: "Thief Bug Female", baseExp: 219, jobExp: 113 },
+      { level: 20, name: "Thief Bug Male", baseExp: 241, jobExp: 100 },
+      { level: 20, name: "Creamy", baseExp: 193, jobExp: 128 },
+      { level: 21, name: "Willow", baseExp: 183, jobExp: 146 },
+      { level: 22, name: "Mandragora", baseExp: 204, jobExp: 146 },
+      { level: 23, name: "Hydra", baseExp: 219, jobExp: 149 },
+      { level: 24, name: "Wolf", baseExp: 242, jobExp: 147 },
+      { level: 25, name: "Roda Frog", baseExp: 212, jobExp: 176 },
+      { level: 26, name: "Whisper", baseExp: 195, jobExp: 198 },
+      { level: 27, name: "Pirate Skeleton", baseExp: 273, jobExp: 166 },
+      { level: 28, name: "Poison Spore", baseExp: 311, jobExp: 155 },
+      { level: 29, name: "Vadon", baseExp: 288, jobExp: 180 },
+      { level: 30, name: "Skeleton", baseExp: 264, jobExp: 206 },
+      { level: 31, name: "Thara Frog", baseExp: 311, jobExp: 195 },
+      { level: 32, name: "Marina", baseExp: 321, jobExp: 206 },
+      { level: 32, name: "Marine Sphere", baseExp: 1, jobExp: 1 },
+      { level: 33, name: "Obeaune", baseExp: 336, jobExp: 212 },
+      { level: 34, name: "Phen", baseExp: 350, jobExp: 222 },
+      { level: 35, name: "Goblin (Knife)", baseExp: 371, jobExp: 224 },
+      { level: 35, name: "Goblin (Buckler)", baseExp: 364, jobExp: 229 },
+      { level: 35, name: "Goblin (Hammer)", baseExp: 367, jobExp: 227 },
+      { level: 35, name: "Goblin (Spear)", baseExp: 369, jobExp: 226 },
+      { level: 35, name: "Goblin (Axe)", baseExp: 410, jobExp: 202 },
+      { level: 36, name: "Marc", baseExp: 376, jobExp: 238 },
+      { level: 37, name: "Goblin Archer", baseExp: 393, jobExp: 242 },
+      { level: 38, name: "Hornet", baseExp: 357, jobExp: 281 },
+      { level: 39, name: "Steam Goblin", baseExp: 436, jobExp: 251 },
+      { level: 40, name: "Deniro", baseExp: 430, jobExp: 270 },
+      { level: 41, name: "Flora", baseExp: 449, jobExp: 284 },
+      { level: 42, name: "Piere", baseExp: 466, jobExp: 298 },
+      { level: 43, name: "Argiope", baseExp: 563, jobExp: 266 },
+      { level: 44, name: "Andre", baseExp: 500, jobExp: 327 },
+      { level: 45, name: "Menblatt", baseExp: 456, jobExp: 376 },
+      { level: 46, name: "Drainliar", baseExp: 673, jobExp: 274 },
+      { level: 47, name: "Vitata", baseExp: 574, jobExp: 356 },
+      { level: 48, name: "Giearth", baseExp: 600, jobExp: 365 },
+      { level: 49, name: "Muka", baseExp: 723, jobExp: 317 },
+      { level: 50, name: "Pecopeco", baseExp: 736, jobExp: 333 },
+      { level: 51, name: "Magnolia", baseExp: 655, jobExp: 413 },
+      { level: 52, name: "Soldier Skeleton", baseExp: 695, jobExp: 422 },
+      { level: 53, name: "Desert Wolf", baseExp: 713, jobExp: 444 },
+      { level: 54, name: "Matyr", baseExp: 888, jobExp: 373 },
+      { level: 55, name: "Mummy", baseExp: 691, jobExp: 520 },
+      { level: 55, name: "Golem", baseExp: 1177, jobExp: 237 },
+      { level: 55, name: "Metaller", baseExp: 761, jobExp: 480 },
+      { level: 56, name: "Elder Willow", baseExp: 794, jobExp: 492 },
+      { level: 57, name: "Isis", baseExp: 988, jobExp: 412 },
+      { level: 58, name: "Bigfoot", baseExp: 858, jobExp: 520 },
+      { level: 59, name: "Savage", baseExp: 993, jobExp: 473 },
+      { level: 60, name: "Greatest General", baseExp: 910, jobExp: 553 },
+      { level: 61, name: "Eggyra", baseExp: 699, jobExp: 716 },
+      { level: 62, name: "Horong", baseExp: 977, jobExp: 594 },
+      { level: 62, name: "Dustiness", baseExp: 950, jobExp: 609 },
+      { level: 63, name: "Munak", baseExp: 1083, jobExp: 574 },
+      { level: 64, name: "Minorous", baseExp: 1210, jobExp: 539 },
+      { level: 65, name: "Bongun", baseExp: 1113, jobExp: 636 },
+      { level: 65, name: "Mantis", baseExp: 1058, jobExp: 667 },
+      { level: 66, name: "Skeleton Archer", baseExp: 1134, jobExp: 665 },
+      { level: 67, name: "Sohee", baseExp: 1139, jobExp: 701 },
+      { level: 68, name: "Marduk", baseExp: 1181, jobExp: 717 },
+      { level: 69, name: "Dokebi", baseExp: 1320, jobExp: 676 },
+      { level: 70, name: "Orc Warrior", baseExp: 1524, jobExp: 597 },
+      { level: 71, name: "Orc Archer", baseExp: 949, jobExp: 981 },
+      { level: 72, name: "Nine Tail", baseExp: 1806, jobExp: 529 },
+      { level: 72, name: "Wild Rose", baseExp: 1317, jobExp: 814 },
+      { level: 72, name: "Kobold (Axe)", baseExp: 1301, jobExp: 823 },
+      { level: 73, name: "High Orc", baseExp: 1524, jobExp: 713 },
+      { level: 73, name: "Kobold (Buckler)", baseExp: 1498, jobExp: 757 },
+      { level: 74, name: "Nightmare", baseExp: 1059, jobExp: 1059 },
+      { level: 74, name: "Kobold (Mace)", baseExp: 1381, jobExp: 873 },
+      { level: 75, name: "Orc Zombie", baseExp: 1444, jobExp: 884 },
+      { level: 75, name: "Kobold Archer", baseExp: 1440, jobExp: 887 },
+      { level: 75, name: "Myst Case", baseExp: 1437, jobExp: 888 },
+      { level: 76, name: "Sky Petite", baseExp: 1486, jobExp: 909 },
+      { level: 77, name: "Marionette", baseExp: 1032, jobExp: 1221 },
+      { level: 78, name: "Orc Skeleton", baseExp: 1560, jobExp: 961 },
+      { level: 78, name: "Cookie", baseExp: 1607, jobExp: 934 },
+      { level: 79, name: "Green Petite", baseExp: 1600, jobExp: 986 },
+      { level: 79, name: "Teddy Bear", baseExp: 1642, jobExp: 963 },
+      { level: 80, name: "Deviruchi", baseExp: 1851, jobExp: 888 },
+      { level: 80, name: "Succubus", baseExp: 1415, jobExp: 1142 },
+      { level: 81, name: "Hunter Fly", baseExp: 1672, jobExp: 1050 },
+      { level: 81, name: "Incubus", baseExp: 1461, jobExp: 1171 },
+      { level: 81, name: "Raydric Archer", baseExp: 1574, jobExp: 1106 },
+      { level: 81, name: "Cruiser", baseExp: 2041, jobExp: 834 },
+      { level: 82, name: "Ferus", baseExp: 2279, jobExp: 753 },
+      { level: 82, name: "Abysmal Knight", baseExp: 1571, jobExp: 1163 },
+      { level: 82, name: "Sting", baseExp: 1586, jobExp: 1155 },
+      { level: 83, name: "Wraith", baseExp: 1973, jobExp: 986 },
+      { level: 83, name: "Rideword", baseExp: 1001, jobExp: 1551 },
+      { level: 83, name: "Cramp", baseExp: 1722, jobExp: 1132 },
+      { level: 83, name: "Zipper Bear", baseExp: 1835, jobExp: 1066 },
+      { level: 84, name: "Anolian", baseExp: 1811, jobExp: 1137 },
+      { level: 85, name: "Injustice", baseExp: 1749, jobExp: 1229 },
+      { level: 86, name: "Gargoyle", baseExp: 1455, jobExp: 1455 },
+      { level: 87, name: "Raydric", baseExp: 2129, jobExp: 1120 },
+      { level: 87, name: "Christmas Cookie", baseExp: 1969, jobExp: 1213 },
+      { level: 88, name: "Baphomet JR.", baseExp: 2140, jobExp: 1170 },
+      { level: 88, name: "Evil Druid", baseExp: 1570, jobExp: 1501 },
+      { level: 88, name: "Punk", baseExp: 2029, jobExp: 1235 },
+      { level: 90, name: "Dark Priest", baseExp: 1994, jobExp: 1367 },
+      { level: 90, name: "Black Witch", baseExp: 2173, jobExp: 1264 },
+      { level: 90, name: "Wind Ghost", baseExp: 2114, jobExp: 1298 },
+      { level: 91, name: "Joker", baseExp: 2126, jobExp: 1355 },
+      { level: 91, name: "Alarm", baseExp: 2236, jobExp: 1290 },
+      { level: 91, name: "Carat", baseExp: 2018, jobExp: 1418 },
+      { level: 92, name: "Ancient Clock", baseExp: 1853, jobExp: 1578 },
+      { level: 93, name: "Khalitzburg", baseExp: 2248, jobExp: 1413 },
+      { level: 93, name: "Bathory", baseExp: 2735, jobExp: 1130 },
+      { level: 94, name: "Wanderer", baseExp: 1989, jobExp: 1627 },
+      { level: 94, name: "Elder", baseExp: 2350, jobExp: 1417 },
+      { level: 95, name: "Metaling", baseExp: 2558, jobExp: 1360 },
+      { level: 95, name: "Penomena", baseExp: 2112, jobExp: 1620 },
+      { level: 96, name: "Brilight", baseExp: 2223, jobExp: 1620 },
+      { level: 97, name: "Typhoon", baseExp: 2435, jobExp: 1560 },
+      { level: 97, name: "97", baseExp: 2423, jobExp: 1567 },
+      { level: 99, name: "Orc Lady", baseExp: 2558, jobExp: 1617 },
+      { level: 99, name: "Martin Scavenger", baseExp: 2573, jobExp: 1609 },
+      { level: 101, name: "Removal", baseExp: 2689, jobExp: 1629 },
+      { level: 103, name: "Mechanical Hound", baseExp: 2851, jobExp: 1584 },
+      { level: 105, name: "Mutant Deposits", baseExp: 2828, jobExp: 1644 },
+      { level: 106, name: "Marmot (Irritated Martin)", baseExp: 2708, jobExp: 1738 },
+      { level: 106, name: "Dark Swordsman", baseExp: 2849, jobExp: 1657 },
+      { level: 107, name: "Dark Acolyte", baseExp: 3012, jobExp: 1585 },
+      { level: 108, name: "Geographer", baseExp: 2550, jobExp: 1878 },
+      { level: 108, name: "Dark Mage", baseExp: 3109, jobExp: 1553 },
+      { level: 109, name: "Harpy", baseExp: 2911, jobExp: 1693 },
+      { level: 109, name: "Fiery Deviruchi", baseExp: 2911, jobExp: 1693 },
+      { level: 109, name: "Dark Merchant", baseExp: 2769, jobExp: 1776 },
+      { level: 110, name: "Fiery Mane", baseExp: 2932, jobExp: 1704 },
+      { level: 110, name: "Dark Archer", baseExp: 2923, jobExp: 1704 },
+      { level: 110, name: "Quve", baseExp: 2581, jobExp: 1908 },
+      { level: 111, name: "Hylozoist", baseExp: 3007, jobExp: 1684 },
+      { level: 111, name: "Highland Parasite", baseExp: 2953, jobExp: 1716 },
+      { level: 112, name: "Fire Elf", baseExp: 2973, jobExp: 1729 },
+      { level: 112, name: "Gibbet", baseExp: 3336, jobExp: 1517 },
+      { level: 112, name: "Dark Thief", baseExp: 3136, jobExp: 1633 },
+      { level: 113, name: "Dullahan", baseExp: 2813, jobExp: 1846 },
+      { level: 114, name: "Fire Fledgling", baseExp: 3015, jobExp: 1752 },
+      { level: 114, name: "Lantern Fisherman", baseExp: 2961, jobExp: 1784 },
+      { level: 115, name: "Lude", baseExp: 2914, jobExp: 1835 },
+      { level: 116, name: "Tomb Zombie", baseExp: 3056, jobExp: 1777 },
+      { level: 116, name: "Magic Pattern Paper", baseExp: 3060, jobExp: 1774 },
+      { level: 118, name: "Scarecrow", baseExp: 3098, jobExp: 1800 },
+      { level: 118, name: "Panda Poring", baseExp: 3267, jobExp: 1702 },
+      { level: 120, name: "Fisherman", baseExp: 2893, jobExp: 1967 },
+      { level: 121, name: "Hodremlin", baseExp: 3045, jobExp: 1904 },
+      { level: 122, name: "Stapo", baseExp: 2965, jobExp: 1974 },
+      { level: 122, name: "Water Snake", baseExp: 3045, jobExp: 1927 },
+      { level: 123, name: "Small Siroma", baseExp: 3520, jobExp: 1676 },
+      { level: 124, name: "Red-tailed Obeaune", baseExp: 2809, jobExp: 2112 },
+      { level: 124, name: "Man-eating Grass", baseExp: 3202, jobExp: 1883 },
+      { level: 125, name: "Siroma", baseExp: 2955, jobExp: 2052 },
+      { level: 126, name: "Roween", baseExp: 2831, jobExp: 2148 },
+      { level: 127, name: "Marin", baseExp: 3284, jobExp: 1909 },
+      { level: 128, name: "Devil's Eye", baseExp: 2795, jobExp: 2217 },
+      { level: 130, name: "Red Devil's Eye", baseExp: 2544, jobExp: 2314 }
+    ];
 
-        function calculateExp() {
-            let level = document.getElementById("level").value;
-            let expType = document.querySelector('input[name="expType"]:checked').value;
-            let inParty = document.getElementById("party").checked;
-            let resultDiv = document.getElementById("result");
-            
-            if (!level || level < 1 || level > 130) {
-                resultDiv.innerHTML = "Please enter a valid level (1-130).";
-                return;
-            }
-            
-            let gapThreshold = inParty ? 35 : 30;
-            
-            let bestMonster = monsters.reduce((best, monster) => {
-                let levelGap = Math.abs(level - monster.level);
-                let expPenalty = levelGap > gapThreshold ? 0 : 1;
-                let selectedExp = expType === "base" ? monster.baseExp * expPenalty : monster.jobExp * expPenalty;
-                return selectedExp > (best.exp || 0) ? { name: monster.name, exp: selectedExp } : best;
-            }, {});
-            
-            resultDiv.innerHTML = bestMonster.exp ? `Best Monster: <strong>${bestMonster.name}</strong><br>EXP: <strong>${bestMonster.exp}</strong>` : "No suitable monster found.";
-        }
-    </script>
+    function calculateExp() {
+      let level = document.getElementById("level").value;
+      let expType = document.querySelector('input[name="expType"]:checked').value;
+      let inParty = document.getElementById("party").checked;
+      let resultDiv = document.getElementById("result");
+
+      if (!level || level < 1 || level > 130) {
+        resultDiv.innerHTML = "Please enter a valid level (1-130).";
+        return;
+      }
+
+      let gapThreshold = inParty ? 35 : 30;
+
+      let bestMonster = monsters.reduce((best, monster) => {
+        let levelGap = Math.abs(level - monster.level);
+        let expPenalty = levelGap > gapThreshold ? 0 : 1;
+        let selectedExp = expType === "base" ? monster.baseExp * expPenalty : monster.jobExp * expPenalty;
+        return selectedExp > (best.exp || 0) ? { name: monster.name, exp: selectedExp } : best;
+      }, {});
+
+      resultDiv.innerHTML = bestMonster.exp
+        ? `Best Monster: <strong>${bestMonster.name}</strong><br>EXP: <strong>${bestMonster.exp}</strong>`
+        : "No suitable monster found.";
+    }
+
+    function toggleMode() {
+      if (document.body.classList.contains("dark")) {
+        document.body.classList.remove("dark");
+        document.body.classList.add("light");
+        document.getElementById("toggleButton").textContent = "Dark Mode";
+      } else {
+        document.body.classList.remove("light");
+        document.body.classList.add("dark");
+        document.getElementById("toggleButton").textContent = "Light Mode";
+      }
+    }
+  </script>
 </body>
 </html>
