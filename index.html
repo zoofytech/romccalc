@@ -13,11 +13,11 @@
     }
     /* Dark mode styles */
     body.dark {
-      background-color: #1A252F;
+      background-color: #1A252F; /* Darker blue/grey */
       color: #ECF0F1;
     }
     body.dark input {
-      background-color: #2E4053;
+      background-color: #2E4053; /* Distinct background for inputs */
       color: #ECF0F1;
       border: 1px solid #3C566B;
       transition: background-color 0.3s, color 0.3s;
@@ -61,9 +61,9 @@
   </style>
 </head>
 <body class="dark">
-  <button id="toggleButton" onclick="toggleMode()">Toggle Light Mode</button> <br>
-  <h1>Ragnarok M:Classic</h1> </br>
-  <h2>Monster EXP Calculator</h2>
+  <button id="toggleButton" onclick="toggleMode()">Toggle Light Mode</button>
+  <h1>Ragnarok M:Classic</h1>
+  <h2>EXP Calculator</h2>
   <label for="level">Enter Your Level:</label>
   <input type="number" id="level" min="1" max="130" />
   <br />
@@ -90,10 +90,17 @@
       .catch(error => console.error('Error loading monsters data:', error));
 
     function calculateExp() {
-      let level = document.getElementById("level").value;
+      // Parse the level as an integer
+      let level = parseInt(document.getElementById("level").value, 10);
       let expType = document.querySelector('input[name="expType"]:checked').value;
       let inParty = document.getElementById("party").checked;
       let resultDiv = document.getElementById("result");
+
+      // Check if monster data has loaded
+      if (monsters.length === 0) {
+        resultDiv.innerHTML = "Monster data is still loading, please try again in a moment.";
+        return;
+      }
 
       if (!level || level < 1 || level > 130) {
         resultDiv.innerHTML = "Please enter a valid level (1-130).";
@@ -104,6 +111,7 @@
 
       let bestMonster = monsters.reduce((best, monster) => {
         let levelGap = Math.abs(level - monster.level);
+        // Apply no EXP if level gap exceeds threshold
         let expPenalty = levelGap > gapThreshold ? 0 : 1;
         let selectedExp = expType === "base" ? monster.baseExp * expPenalty : monster.jobExp * expPenalty;
         return selectedExp > (best.exp || 0) ? { name: monster.name, exp: selectedExp } : best;
