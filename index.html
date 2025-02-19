@@ -62,7 +62,7 @@
 </head>
 <body class="dark">
   <button id="toggleButton" onclick="toggleMode()">Toggle Light Mode</button> <br>
-  <h1>Ragnarok M:Classic</h1> </br>
+  <h1>Ragnarok M:Classic</h1>
   <h2>Monster EXP Calculator</h2>
   <label for="level">Enter Your Level:</label>
   <input type="number" id="level" min="1" max="130" />
@@ -110,7 +110,7 @@
       }, {});
 
       resultDiv.innerHTML = bestMonster.exp
-        ? `Best Monster: <h1><strong>${bestMonster.name}</strong></h1><br><h2>EXP: <strong>${bestMonster.exp}</h2></strong>`
+        ? `<h1>Best Monster: <strong>${bestMonster.name}</strong><br> EXP: <strong>${bestMonster.exp}</h1></strong>`
         : "No suitable monster found.";
     }
 
