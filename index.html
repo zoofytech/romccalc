@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ragnarok M: Monster EXP Calculator</title>
+  <title>Ragnarok M:Classic Monster EXP Calculator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,11 +13,11 @@
     }
     /* Dark mode styles */
     body.dark {
-      background-color: #1A252F;
+      background-color: #1A252F; /* Darker blue/grey */
       color: #ECF0F1;
     }
     body.dark input {
-      background-color: #2E4053;
+      background-color: #2E4053; /* Distinct background for inputs */
       color: #ECF0F1;
       border: 1px solid #3C566B;
       transition: background-color 0.3s, color 0.3s;
@@ -61,20 +61,17 @@
   </style>
 </head>
 <body class="dark">
-  <button id="toggleButton" onclick="toggleMode()">Toggle Light Mode</button> <br>
-  <h1>Ragnarok M:Classic</h1>
-  <h2>Monster EXP Calculator</h2>
+  <button id="toggleButton" onclick="toggleMode()">Toggle Light Mode</button>
+  <h1>Ragnarok M:Classic </h1>
+  <h2> Monster EXP Calculator</h2> <br /><br />
   <label for="level">Enter Your Level:</label>
   <input type="number" id="level" min="1" max="130" />
-  <br /> <br />
+  <br /><br />
   <input type="radio" id="baseExp" name="expType" value="base" checked />
   <label for="baseExp">Best Base EXP</label>
   <input type="radio" id="jobExp" name="expType" value="job" />
   <label for="jobExp">Best Job EXP</label>
   <br /> <br />
-  <!-- <input type="checkbox" id="party" />
-  <label for="party">In Party (Level gap threshold increases to 35)</label>
-  <br /> REMOVED since this was myth-->
   <button onclick="calculateExp()">Calculate</button>
   <div id="result"></div>
 
@@ -83,24 +80,40 @@
 
     // Fetch the monster data from the JSON file.
     fetch('monsters.json')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
         monsters = data;
+        console.log("Monsters data loaded:", monsters);
       })
-      .catch(error => console.error('Error loading monsters data:', error));
+      .catch(error => {
+        console.error('Error loading monsters data:', error);
+        document.getElementById("result").innerHTML = "Error loading monster data.";
+      });
 
     function calculateExp() {
-      let level = document.getElementById("level").value;
+      // Parse level as an integer
+      let level = parseInt(document.getElementById("level").value, 10);
       let expType = document.querySelector('input[name="expType"]:checked').value;
-      let inParty = document.getElementById("party").checked;
       let resultDiv = document.getElementById("result");
+
+      // Check if monster data is loaded
+      if (monsters.length === 0) {
+        resultDiv.innerHTML = "Monster data is still loading, please try again in a moment.";
+        return;
+      }
 
       if (!level || level < 1 || level > 130) {
         resultDiv.innerHTML = "Please enter a valid level (1-130).";
         return;
       }
 
-      let gapThreshold = inParty ? 35 : 30;
+      // Fixed level gap threshold (party function removed)
+      let gapThreshold = 30;
 
       let bestMonster = monsters.reduce((best, monster) => {
         let levelGap = Math.abs(level - monster.level);
@@ -110,7 +123,7 @@
       }, {});
 
       resultDiv.innerHTML = bestMonster.exp
-        ? `<h1>Best Monster: <strong>${bestMonster.name}</strong><br> EXP: <strong>${bestMonster.exp}</h1></strong>`
+        ? ` <h1> Best Monster:<strong>${bestMonster.name}</strong><br>EXP: <strong>${bestMonster.exp}</h1> </strong>`
         : "No suitable monster found.";
     }
 
@@ -125,7 +138,8 @@
         document.getElementById("toggleButton").textContent = "Toggle Light Mode";
       }
     }
-  </script> <br />
-  <h3><a href="https://github.com/zoofytech/romccalc/blob/main/monsters.json">Contribute</a></h3>
+  </script>
+    <h3><a href="https://github.com/zoofytech/romccalc/blob/main/monsters.json">Contribute</a></h3>
 </body>
 </html>
+
